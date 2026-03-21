@@ -47,6 +47,15 @@ const RANK_ORDER = [
   "رقيب أول", "رقيب", "عريف", "وكيل عريف", "حارس",
 ];
 
+const COMMITTEE_ROLE = "1484710458438193272";
+
+const JOB_ROLES = {
+  "إدارة الشرطة": "1483461854352380106",
+  "شركة الرائد للحراسة": "1483132872155070738",
+  "الدفاع المدني": "1483461905916891198",
+  "كراج ميكانيكي": "1483461943946776647",
+};
+
 const APPROVAL_CHOICES = [
   { name: "قائد الشرطة", value: "1483143249014296739" },
   { name: "نائب قائد الشرطة", value: "1483474508630331462" },
@@ -120,10 +129,6 @@ const commands = [
     .addUserOption(o => o.setName("الشخص").setDescription("منشن الشخص").setRequired(true))
     .addStringOption(o =>
       o.setName("الرتبة-الحالية").setDescription("الرتبة الحالية").setRequired(true)
-        .addChoices(...RANK_ORDER.map(r => ({ name: r, value: r })))
-    )
-    .addStringOption(o =>
-      o.setName("الرتبة-الجديدة").setDescription("الرتبة الجديدة").setRequired(true)
         .addChoices(...RANK_ORDER.map(r => ({ name: r, value: r })))
     )
     .addStringOption(o =>
@@ -342,20 +347,29 @@ client.on("interactionCreate", async interaction => {
   if (commandName === "لجنة-الرقابة") {
     const member = interaction.options.getMember("الشخص");
     const oldRank = interaction.options.getString("الرتبة-الحالية", true);
-    const newRank = interaction.options.getString("الرتبة-الجديدة", true);
     const job = interaction.options.getString("الوظيفة", true);
     if (!member) {
       await interaction.reply({ content: "❌ حدث خطأ تواصل مع الإدارة", ephemeral: true });
       return;
     }
+    const oldIdx = RANK_ORDER.indexOf(oldRank);
+    const newRank = oldIdx > 0 ? RANK_ORDER[oldIdx - 1] : null;
+    if (!newRank) {
+      await interaction.reply({ content: "❌ هذه الرتبة هي الأعلى ولا يمكن الترقية منها.", ephemeral: true });
+      return;
+    }
     try {
       if (RANKS[oldRank]) await member.roles.remove(RANKS[oldRank]);
       if (RANKS[newRank]) await member.roles.add(RANKS[newRank]);
+      const oldRankMention = RANKS[oldRank] ? `<@&${RANKS[oldRank]}>` : oldRank;
+      const newRankMention = RANKS[newRank] ? `<@&${RANKS[newRank]}>` : newRank;
+      const jobRoleId = JOB_ROLES[job];
       await interaction.channel.send(
-        `**بسم الرحمن الرحيم\n\nقرار لجنة الرقابة\n\n<@${member.id}>\nالوظيفة: ${job}\nمن رتبة: ${oldRank}\nإلى رتبة: ${newRank}\n\n\`\`\`${decisionCode()}\`\`\`**`
+        `**بعد مراجعة الجهود المبذولة للمذكور <@${member.id}> قررنا من قبل <@&${COMMITTEE_ROLE}> بما هو آتي :\n\nقبول ترشيحه من رتبة ${oldRankMention} إلى رتبة ${newRankMention}\n\nاعلاك الله على مهامك والأمانة المترتبة على رتبتك الحالية\n\nخالص التقدير\n<@&${COMMITTEE_ROLE}>${jobRoleId ? `\n<@&${jobRoleId}>` : ""}\n\n\`\`\`${decisionCode()}\`\`\`**`
       );
-      await interaction.reply({ content: "✅ تم تنفيذ قرار لجنة الرقابة.", ephemeral: true });
-    } catch {
+      await interaction.reply({ content: "✅ تم إرسال قرار لجنة الرقابة.", ephemeral: true });
+    } catch (err) {
+      console.error(err);
       await interaction.reply({ content: "❌ حدث خطأ تواصل مع الإدارة", ephemeral: true });
     }
     return;
