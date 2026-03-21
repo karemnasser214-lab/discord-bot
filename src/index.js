@@ -365,7 +365,7 @@ client.on("interactionCreate", async interaction => {
       const newRankMention = RANKS[newRank] ? `<@&${RANKS[newRank]}>` : newRank;
       const jobRoleId = JOB_ROLES[job];
       await interaction.channel.send(
-        `**بعد مراجعة الجهود المبذولة للمذكور <@${member.id}> قررنا من قبل <@&${COMMITTEE_ROLE}> بما هو آتي :\n\nقبول ترشيحه من رتبة ${oldRankMention} إلى رتبة ${newRankMention}\n\nاعلاك الله على مهامك والأمانة المترتبة على رتبتك الحالية\n\nتوقيع\n<@&${COMMITTEE_ROLE}>${jobRoleId ? `\n<@&${jobRoleId}>` : ""}\n\n\`\`\`${decisionCode()}\`\`\`**`
+        `**بعد مراجعة الجهود المبذولة للمذكور <@${member.id}> قررنا من قبل <@&${COMMITTEE_ROLE}> بما هو آتي :\n\nقبول ترشيحه من رتبة ${oldRankMention} إلى رتبة ${newRankMention}\n\nاعلاك الله على مهامك والأمانة المترتبة على رتبتك الحالية\n\nشكر\n<@&${COMMITTEE_ROLE}>${jobRoleId ? `\n<@&${jobRoleId}>` : ""}\n\n\`\`\`${decisionCode()}\`\`\`**`
       );
       await interaction.reply({ content: "✅ تم إرسال قرار لجنة الرقابة.", ephemeral: true });
     } catch (err) {
