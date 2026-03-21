@@ -113,6 +113,20 @@ const commands = [
         { name: "كراج ميكانيكي", value: "كراج ميكانيكي" }
       )
     ),
+  // إضافة أمر لجنة الرقابة
+  new SlashCommandBuilder()
+    .setName("لجنة-الرقابة")
+    .setDescription("قرار لجنة الرقابة للترقية")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .addUserOption(o => o.setName("الشخص").setDescription("منشن الشخص").setRequired(true))
+    .addStringOption(o => o.setName("الرتبة-الحالية").setDescription("الرتبة الحالية").setRequired(true).addChoices(...RANK_ORDER.map(r => ({ name: r, value: r }))))
+    .addStringOption(o => o.setName("الرتبة-الجديدة").setDescription("الرتبة الجديدة").setRequired(true).addChoices(...RANK_ORDER.map(r => ({ name: r, value: r }))))
+    .addStringOption(o => o.setName("الوظيفة").setDescription("الوظيفة").setRequired(true).addChoices(
+      { name: "إدارة الشرطة", value: "إدارة الشرطة" },
+      { name: "شركة الرائد للحراسة", value: "شركة الرائد للحراسة" },
+      { name: "الدفاع المدني", value: "الدفاع المدني" },
+      { name: "كراج ميكانيكي", value: "كراج ميكانيكي" }
+    )),
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
@@ -317,15 +331,12 @@ client.on("interactionCreate", async interaction => {
     }
     return;
   }
-});
 
-async function login() {
-  try {
-    await client.login(TOKEN);
-  } catch (err) {
-    console.error("❌ فشل تسجيل الدخول، إعادة المحاولة بعد 10 ثواني...", err.message);
-    setTimeout(login, 10000);
-  }
-}
-
-login();
+  // أمر لجنة الرقابة
+  if (commandName === "لجنة-الرقابة") {
+    const member = interaction.options.getMember("الشخص");
+    const oldRank = interaction.options.getString("الرتبة-الحالية", true);
+    const newRank = interaction.options.getString("الرتبة-الجديدة", true);
+    const job = interaction.options.getString("الوظيفة", true);
+    if (!member) {
+      await interaction.reply
